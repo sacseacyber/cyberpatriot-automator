@@ -1,5 +1,6 @@
 package client.tasks;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -32,10 +33,39 @@ public abstract class Task implements Runnable {
 	/**
 	 * Used to set the name of the task
 	 *
-	 * @param name
+	 * @param name the name of the task
 	 */
-	protected Task(String name) {
+	Task(String name) {
 		this.name = name;
+		this.progressCallbacks = new ArrayList<>();
+		this.finishCallbacks = new ArrayList<>();
+	}
+
+	/**
+	 * Gets the progress
+	 *
+	 * @return the progress
+	 */
+	public int getProgress() {
+		return progress;
+	}
+
+	/**
+	 * Adds a callback for when the task is finished
+	 *
+	 * @param callback The callback for being finished
+	 */
+	public void addFinishCallback(Consumer<TaskUpdate> callback) {
+		this.finishCallbacks.add(callback);
+	}
+
+	/**
+	 * Adds a callback for when the task decides to update its progress
+	 *
+	 * @param callback The callback containing the progress information
+	 */
+	public void addProgressCallback(Consumer<TaskUpdate> callback) {
+		this.progressCallbacks.add(callback);
 	}
 
 	/**
@@ -47,9 +77,15 @@ public abstract class Task implements Runnable {
 		return new Thread(this);
 	}
 
+	/**
+	 * A method used by the task to signal an update in the progress
+	 *
+	 * @param progress the new progress, from 0 to 1
+	 * @param text a message that can go with the progress update
+	 */
 	protected void updateProgress(
-		int progress,
-		String text
+			int progress,
+			String text
 	) {
 		this.progress = progress;
 
@@ -60,18 +96,33 @@ public abstract class Task implements Runnable {
 				progress
 		);
 
-		int size = this.progressCallbacks.size();
-
-		for (int i = 0; i < size; i++) {
-			this.progressCallbacks.get(i).accept(status);
+		for (Consumer<TaskUpdate> callback : this.progressCallbacks) {
+			callback.accept(status);
 		}
 	}
 
 	/**
-	 * Gets the progress
-	 * @return the progress
+	 * A method used by the task to signal completion
+	 *
+	 * @param text Completion message
+	 * @param success true if the task succeeded, false for failure
 	 */
-	public int getProgress() {
-		return progress;
+	protected void finishTask(
+			String text,
+			boolean success
+	) {
+		// We're done
+		this.progress = 1;
+
+		TaskUpdate status = new TaskUpdate(
+				success ? TaskStatus.SUCCEEDED : TaskStatus.FAILED,
+				this.name,
+				text,
+				1
+		);
+
+		for (Consumer<TaskUpdate> callback : this.finishCallbacks) {
+			callback.accept(status);
+		}
 	}
 }
