@@ -1,13 +1,49 @@
 package client.tasks;
 
+import client.Util;
+import client.tasks.taskannotations.LinuxTask;
+import client.tasks.taskannotations.WindowsTask;
+
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * Represents a task that the program can do, e.g. enable the firewall
+ *
+ * To create a task, just extend this class and add either the LinuxTask annotation,
+ * the WindowsTask annotation, or both
+ * If it does not have an annotation it is assumed that the task is not meant for either Linux
+ * or Windows and will not show up for either
+ *
+ * This new task then has to have two methods, a constructor and a `public void run()` method
+ *
+ * The constructor has to call the superclass constructor with a String representing the name
+ * of the task
+ *
+ * To register the task, go to cpautomator.Entry.initializeTasks and construct your task
+ *
+ * The `public void run()` task can do whatever AS LONG AS IT CALLS
+ * `this.finishTask(String desc, boolean success)`
+ *
+ * IT IS VERY IMPORTANT THAT IT CALLS THIS FUNCTION, AS OTHERWISE THE PROGRAM WILL NOT
+ * PROCEED DUE TO WAITING FOR YOUR TASK TO FINISH
  */
 public abstract class Task implements Runnable {
+	/**
+	 * A list of tasks that can be used
+	 *
+	 * To be added to by the Task constructor
+	 */
+	private static List<Task> TaskList = new ArrayList<>();
+	/**
+	 * Used to get the task list
+	 */
+	static List<Task> GetTaskList() {
+		return new ArrayList<>(Task.TaskList);
+	}
+
 	/**
 	 * The name of the task
 	 */
@@ -44,10 +80,22 @@ public abstract class Task implements Runnable {
 	 *
 	 * @param name the name of the task
 	 */
-	Task(String name) {
+	protected Task(String name) {
 		this.name = name;
 		this.progressCallbacks = new ArrayList<>();
 		this.finishCallbacks = new ArrayList<>();
+
+		Class taskClass = this.getClass();
+		Annotation[] annotations = taskClass.getAnnotations();
+
+		for (Annotation annotation : annotations) {
+			if (annotation instanceof LinuxTask && !((LinuxTask) annotation).disabled() && Util.isLinux()) {
+				Task.TaskList.add(this);
+			}
+			if (annotation instanceof WindowsTask && !((WindowsTask) annotation).disabled() && Util.isWindows()) {
+				Task.TaskList.add(this);
+			}
+		}
 	}
 
 	/**
@@ -55,7 +103,7 @@ public abstract class Task implements Runnable {
 	 *
 	 * @return the progress
 	 */
-	float getProgress() {
+	final float getProgress() {
 		return progress;
 	}
 
@@ -82,7 +130,7 @@ public abstract class Task implements Runnable {
 	 *
 	 * @param callback The callback for being finished
 	 */
-	public void addFinishCallback(Consumer<Task> callback) {
+	final void addFinishCallback(Consumer<Task> callback) {
 		this.finishCallbacks.add(callback);
 	}
 
@@ -91,7 +139,7 @@ public abstract class Task implements Runnable {
 	 *
 	 * @param callback The callback containing the progress information
 	 */
-	public void addProgressCallback(Consumer<Task> callback) {
+	final void addProgressCallback(Consumer<Task> callback) {
 		this.progressCallbacks.add(callback);
 	}
 
@@ -100,7 +148,7 @@ public abstract class Task implements Runnable {
 	 *
 	 * @return A thread for the task
 	 */
-	public Thread runTask () {
+	Thread runTask () {
 		this.progress = 0;
 		this.status = TaskStatus.RUNNING;
 
@@ -113,7 +161,7 @@ public abstract class Task implements Runnable {
 	 * @param progress the new progress, from 0 to 1
 	 * @param text a message that can go with the progress update
 	 */
-	protected void updateProgress(float progress, String text) {
+	protected final void updateProgress(float progress, String text) {
 		if (this.status == TaskStatus.SUCCEEDED || this.status == TaskStatus.FAILED) {
 			return;
 		}
@@ -132,7 +180,7 @@ public abstract class Task implements Runnable {
 	 * @param text Completion message
 	 * @param success true if the task succeeded, false for failure
 	 */
-	protected void finishTask(String text, boolean success) {
+	protected final void finishTask(String text, boolean success) {
 		if (this.status == TaskStatus.SUCCEEDED || this.status == TaskStatus.FAILED) {
 			return;
 		}

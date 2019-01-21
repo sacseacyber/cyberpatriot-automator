@@ -61,8 +61,11 @@ public class Util {
 
 	public static void elevate() {
 		if (Util.isWindows()) {
+			// TODO: Implement a UAC interface for Windows
 			// https://stackoverflow.com/questions/30082838/elevate-java-application-while-running
 		} else {
+			// We don't care about Linux users, they're most likely smart enough if they're assigned
+			// to Linux to use sudo
 			System.out.println("Run command with sudo dummy");
 		}
 

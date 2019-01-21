@@ -1,7 +1,5 @@
 package client.tasks;
 
-import client.Util;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -10,7 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskRunner extends JPanel {
-
+	/**
+	 * A custom renderer for the Task objects
+	 *
+	 * Basically displays the text for the task, maybe a reason for why it failed (if applicable),
+	 * and background colors based on if it is selected, has failed, or has succeeded
+	 */
 	private class TaskCellRenderer extends JLabel implements ListCellRenderer<Task> {
 		@Override
 		public Component getListCellRendererComponent(
@@ -20,7 +23,11 @@ public class TaskRunner extends JPanel {
 				boolean isSelected,
 				boolean hasFocus
 		) {
-			this.setText(task.name);
+			this.setText(
+					task.getStatus() == TaskStatus.FAILED
+							? (task.name + ": " + task.getStatusMessage())
+							: task.name
+			);
 			this.setOpaque(true);
 
 			switch (task.getStatus()) {
@@ -41,6 +48,9 @@ public class TaskRunner extends JPanel {
 		}
 	}
 
+	/**
+	 * Fields to control UI elements
+	 */
 	private JPanel taskPanel;
 	private JPanel taskStatusPanel;
 	private JProgressBar taskProgress;
@@ -56,10 +66,12 @@ public class TaskRunner extends JPanel {
 	private JButton dequeueSelectedButton;
 	private JButton dequeueAllButton;
 
+	/**
+	 * Fields that control the tasks
+	 */
 	private List<Task> availableTasks;
 	private List<Task> queuedTasks;
 	private List<Task> finishedTasks;
-
 	private Task currentTask;
 
 	/**
@@ -76,21 +88,13 @@ public class TaskRunner extends JPanel {
 		this.addSelectionListeners();
 	}
 
+	/**
+	 * Initializes the UI components
+	 *
+	 * Fills the data in the different JLists
+	 */
 	public void createUIComponents() {
-		if (Util.isWindows()) {
-			this.availableTasks = new ArrayList<>();
-
-			// Not all tasks work across OSes like EnableFirewall
-			this.availableTasks.add(new EnableFirewall());
-			this.availableTasks.add(new FiveSecondTimer());
-			this.availableTasks.add(new TaskThatWillFail());
-		} else {
-			this.availableTasks = new ArrayList<>();
-
-			this.availableTasks.add(new EnableFirewall());
-			this.availableTasks.add(new FiveSecondTimer());
-			this.availableTasks.add(new TaskThatWillFail());
-		}
+		this.availableTasks = Task.GetTaskList();
 
 		this.queuedTasks = new ArrayList<>(this.availableTasks.size());
 		this.finishedTasks = new ArrayList<>(this.availableTasks.size());
@@ -111,6 +115,11 @@ public class TaskRunner extends JPanel {
 		this.updateTaskInfo();
 	}
 
+	/**
+	 * Changes the labels to show the information for the specified task
+	 *
+	 * @param task The Task to display info for
+	 */
 	private void updateTaskInfo(Task task) {
 		if (task != null) {
 			this.taskName.setText(task.name);
@@ -123,10 +132,16 @@ public class TaskRunner extends JPanel {
 		}
 	}
 
+	/**
+	 * Changes the labels to show the information for the current task
+	 */
 	private void updateTaskInfo() {
 		this.updateTaskInfo(this.currentTask);
 	}
 
+	/**
+	 * Updates the JList components to match the internal Task lists
+	 */
 	private void updateDisplays() {
 		this.availableTasksDisplay.setListData(this.taskArray(this.availableTasks));
 		this.queuedTasksDisplay.setListData(this.taskArray(this.queuedTasks));
@@ -136,6 +151,9 @@ public class TaskRunner extends JPanel {
 		queuedTasksDisplay.clearSelection();
 	}
 
+	/**
+	 * Updates the buttons to make them disabled when there are tasks running
+	 */
 	private void updateButtons() {
 		this.dequeueSelectedButton.setEnabled(this.isNotFrozen());
 		this.queueSelectedButton.setEnabled(this.isNotFrozen());
@@ -160,7 +178,11 @@ public class TaskRunner extends JPanel {
 		return returnValue;
 	}
 
+	/**
+	 * Adds the button listeners to the different buttons
+	 */
 	private void addQueueButtonListeners() {
+		// Adds a function to handle queueing all the available tasks
 		queueAllButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent mouseEvent) {
@@ -173,6 +195,7 @@ public class TaskRunner extends JPanel {
 				}
 			}
 		});
+		// Moves the queued tasks back to the available list
 		dequeueAllButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent mouseEvent) {
@@ -185,6 +208,7 @@ public class TaskRunner extends JPanel {
 				}
 			}
 		});
+		// Takes the currently selected queued task and moves it to the available list
 		queueSelectedButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent mouseEvent) {
@@ -198,6 +222,7 @@ public class TaskRunner extends JPanel {
 				}
 			}
 		});
+		// Takes the currently selected task and queues it
 		dequeueSelectedButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent mouseEvent) {
@@ -211,6 +236,7 @@ public class TaskRunner extends JPanel {
 				}
 			}
 		});
+		// Takes queued tasks and runs them, freezing the UI
 		runQueuedTasksButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent mouseEvent) {
@@ -221,11 +247,19 @@ public class TaskRunner extends JPanel {
 		});
 	}
 
+	/**
+	 * Simple callbacks to ensure there is only one element selected at a time
+	 */
 	private void addSelectionListeners() {
 		availableTasksDisplay.addListSelectionListener(listSelectionEvent -> queuedTasksDisplay.clearSelection());
 		queuedTasksDisplay.addListSelectionListener(listSelectionEvent -> availableTasksDisplay.clearSelection());
 	}
 
+	/**
+	 * A function that will "recursively/iteratively" execute each task, freezing the UI
+	 *
+	 * After all tasks are executed the UI is unfrozen
+	 */
 	private void runTask() {
 		// By some extension, the exit condition of a recursive function
 		// This function starts a task -> task finishes -> calls onTaskFinish -> calls this function

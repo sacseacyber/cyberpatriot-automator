@@ -1,7 +1,16 @@
-package client.tasks;
+package client.tasks.common;
+
+import client.tasks.Task;
+import client.tasks.taskannotations.LinuxTask;
+import client.tasks.taskannotations.WindowsTask;
 
 import javax.swing.*;
 
+/**
+ * A five second timer to demonstrate the capabilities of the progress bar
+ */
+@LinuxTask(disabled = true)
+@WindowsTask(disabled = true)
 public class FiveSecondTimer extends Task {
 	private float count = 0;
 	private Timer timer;
@@ -32,14 +41,16 @@ public class FiveSecondTimer extends Task {
 		this.timer.start();
 	}
 
+	/**
+	 * Private methods for accessing information outside of the timer
+	 */
+
 	private float getCount() {
 		return this.count;
 	}
-
 	private void incrementCount() {
 		this.count++;
 	}
-
 	private void stop() {
 		this.timer.stop();
 	}

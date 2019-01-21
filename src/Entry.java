@@ -1,5 +1,10 @@
 import client.Main;
 import client.Util;
+import client.tasks.common.FiveSecondTimer;
+import client.tasks.common.TaskThatWillFail;
+import client.tasks.linux.DisableSSHRootLogin;
+import client.tasks.linux.EnableLinuxFirewall;
+import client.tasks.windows.EnableWindowsFirewall;
 import server.Server;
 
 import java.nio.file.Path;
@@ -37,11 +42,13 @@ public class Entry {
 		// Start the client
 		if (mode == RunMode.CLIENT) {
 			if (!Util.isAdministrator()) {
-				// If windows, use this
-				// https://stackoverflow.com/questions/30082838/elevate-java-application-while-running
-
 				Util.elevate();
+				System.exit(0);
 			}
+
+			// Initialize the client tasks, as the Main class initializes the UI
+			// TODO: Move this to the Main class properly
+			initializeTasks();
 
 			// It won't get here unless admin user
 			Main mainWindow = new Main();
@@ -59,5 +66,18 @@ public class Entry {
 
 			Server server = new Server(location, port);
 		}
+	}
+
+	private static void initializeTasks() {
+		// Linux tasks
+		new EnableLinuxFirewall();
+		new DisableSSHRootLogin();
+
+		// Common tasks
+		new FiveSecondTimer();
+		new TaskThatWillFail();
+
+		// Windows tasks
+		new EnableWindowsFirewall();
 	}
 }
