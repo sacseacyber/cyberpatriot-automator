@@ -21,7 +21,7 @@ public abstract class Task implements Runnable {
 	/**
 	 * The current progress of the task
 	 */
-	private int progress = 0;
+	private float progress = 0;
 	/**
 	 * The current status of the task
 	 */
@@ -55,7 +55,7 @@ public abstract class Task implements Runnable {
 	 *
 	 * @return the progress
 	 */
-	int getProgress() {
+	float getProgress() {
 		return progress;
 	}
 
@@ -113,7 +113,7 @@ public abstract class Task implements Runnable {
 	 * @param progress the new progress, from 0 to 1
 	 * @param text a message that can go with the progress update
 	 */
-	protected void updateProgress(int progress,	String text) {
+	protected void updateProgress(float progress, String text) {
 		if (this.status == TaskStatus.SUCCEEDED || this.status == TaskStatus.FAILED) {
 			return;
 		}

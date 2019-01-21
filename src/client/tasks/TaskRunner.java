@@ -82,10 +82,14 @@ public class TaskRunner extends JPanel {
 
 			// Not all tasks work across OSes like EnableFirewall
 			this.availableTasks.add(new EnableFirewall());
+			this.availableTasks.add(new FiveSecondTimer());
+			this.availableTasks.add(new TaskThatWillFail());
 		} else {
 			this.availableTasks = new ArrayList<>();
 
 			this.availableTasks.add(new EnableFirewall());
+			this.availableTasks.add(new FiveSecondTimer());
+			this.availableTasks.add(new TaskThatWillFail());
 		}
 
 		this.queuedTasks = new ArrayList<>(this.availableTasks.size());
@@ -111,7 +115,7 @@ public class TaskRunner extends JPanel {
 		if (task != null) {
 			this.taskName.setText(task.name);
 			this.taskStatus.setText(task.getStatusMessage());
-			this.taskProgress.setValue(task.getProgress() * 100);
+			this.taskProgress.setValue((int)(task.getProgress() * 100));
 		} else {
 			this.taskName.setText("");
 			this.taskStatus.setText("");
