@@ -1,10 +1,14 @@
 package client;
 
+import client.tasks.TaskRunner;
+
 import javax.swing.*;
 
 public class Main extends JFrame {
 	private JTabbedPane tabbedPane;
 	private JPanel panel;
+	private JPanel taskRunnerTab;
+	private TaskRunner taskRunnerPanel;
 
 	public Main() {
 		super("CP Automator");
