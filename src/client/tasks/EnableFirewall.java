@@ -17,6 +17,8 @@ public class EnableFirewall extends Task {
 				Process p = Runtime.getRuntime().exec("ufw enable");
 
 				p.waitFor();
+
+				this.finishTask("Updated firewall", true);
 			} catch(IOException | InterruptedException e) {
 
 			}
