@@ -1,6 +1,7 @@
 package client.tasks;
 
 import client.Util;
+import client.readme.README;
 import client.tasks.taskannotations.LinuxTask;
 import client.tasks.taskannotations.WindowsTask;
 
@@ -74,6 +75,10 @@ public abstract class Task implements Runnable {
 	 * A list of callbacks for when the task is done
 	 */
 	private List<Consumer<Task>> finishCallbacks;
+	/**
+	 * The README information some tasks require
+	 */
+	private README readme;
 
 	/**
 	 * Used to set the name of the task
@@ -126,6 +131,13 @@ public abstract class Task implements Runnable {
 	}
 
 	/**
+	 * Used by the actual tasks to get readme information
+	 */
+	protected README getReadme() {
+		return this.readme;
+	}
+
+	/**
 	 * Adds a callback for when the task is finished
 	 *
 	 * @param callback The callback for being finished
@@ -148,9 +160,10 @@ public abstract class Task implements Runnable {
 	 *
 	 * @return A thread for the task
 	 */
-	Thread runTask () {
+	Thread runTask (README readmeInformation) {
 		this.progress = 0;
 		this.status = TaskStatus.RUNNING;
+		this.readme = readmeInformation;
 
 		return new Thread(this);
 	}

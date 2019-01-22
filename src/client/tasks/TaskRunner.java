@@ -1,5 +1,7 @@
 package client.tasks;
 
+import client.readme.README;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -75,6 +77,11 @@ public class TaskRunner extends JPanel {
 	private Task currentTask;
 
 	/**
+	 * README information provided by main class
+	 */
+	private README readme;
+
+	/**
 	 * Whether or not the task runner is running tasks and not open to user input
 	 *
 	 * @return whether or not the GUI should be frozen
@@ -83,9 +90,10 @@ public class TaskRunner extends JPanel {
 		return this.currentTask == null;
 	}
 
-	public TaskRunner() {
+	public TaskRunner(README readme) {
 		this.addQueueButtonListeners();
 		this.addSelectionListeners();
+		this.readme = readme;
 	}
 
 	/**
@@ -269,7 +277,7 @@ public class TaskRunner extends JPanel {
 			this.currentTask.addFinishCallback(this::onTaskFinish);
 			this.currentTask.addProgressCallback(this::onTaskUpdate);
 
-			this.currentTask.runTask().run();
+			this.currentTask.runTask(this.readme).run();
 		} else {
 			// If the current task is nothing, the task runner is doing nothing
 			// Therefore, re-enable queue operations
