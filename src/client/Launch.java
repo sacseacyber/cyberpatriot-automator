@@ -1,5 +1,6 @@
 package client;
 
+import client.config.CPConfig;
 import client.readme.README;
 import client.tasks.common.FiveSecondTimer;
 import client.tasks.common.TaskThatWillFail;
@@ -22,15 +23,22 @@ public class Launch {
 	public Launch() {
 		this.initializeTasks();
 
-		try {
-			README readme = README.getReadme();
+//		try {
+			CPConfig config = CPConfig.ReadFromFile(CPConfig.GetDefaultFileLocation());
+//			README readme = README.getReadme();
+			README readme = new README(
+					new String[] { "ballen" },
+					new String[] { "ballen", "apennyworth" },
+					new String[] {},
+					""
+			);
 
-			MainWindow mainWindow = new MainWindow(readme);
-		} catch(IOException e) {
-			e.printStackTrace();
-			System.out.println("Cannot get README information");
-			System.exit(1);
-		}
+			MainWindow mainWindow = new MainWindow(readme, config);
+//		} catch(IOException e) {
+//			e.printStackTrace();
+//			System.out.println("Cannot get README information");
+//			System.exit(1);
+//		}
 	}
 
 	/**

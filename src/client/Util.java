@@ -1,9 +1,7 @@
 package client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.Scanner;
 
 /**
  * A cross platform collection of utilities
@@ -70,5 +68,29 @@ public class Util {
 		}
 
 		System.exit(0);
+	}
+
+	public static String readFromFile(File file) throws IOException {
+		Scanner fileReader = new Scanner(file);
+
+		StringBuilder results = new StringBuilder();
+
+		while (fileReader.hasNext()) {
+			results.append(fileReader.next());
+		}
+
+		fileReader.close();
+
+		return results.toString();
+	}
+
+	public static void writeToFile(File file, String data) throws IOException {
+		writeToFile(file, data.getBytes());
+	}
+
+	public static void writeToFile(File file, byte[] data) throws IOException {
+		FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
+		out.write(data);
+		out.close();
 	}
 }

@@ -49,7 +49,7 @@ public class Entry {
 			Path dataPath = Paths.get("user.home");
 			Path location = Paths.get(dataPath.toString(), "data");
 
-			int port = 0xCCCC;
+			int port = 54248;
 
 			if (args.length == 2) {
 				location = Paths.get(args[1]);
