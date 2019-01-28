@@ -4,10 +4,15 @@ import client.Util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class CPConfig {
 	private String remoteDataServerHost;
 	private int remoteDataServerPort;
+
+	private List<Consumer<CPConfig>> changeListeners = new ArrayList<>();
 
 	public static File GetDefaultFileLocation() {
 		return new File(Util.isWindows() ? "C:\\CPConfig.dat" : "/CPConfig.dat");
@@ -87,5 +92,13 @@ public class CPConfig {
 		try {
 			Util.writeToFile(location, fileData);
 		} catch(IOException ignore) {}
+
+		for (Consumer<CPConfig> callback : this.changeListeners) {
+			callback.accept(this);
+		}
+	}
+
+	public void addChangeListener(Consumer<CPConfig> callback) {
+		this.changeListeners.add(callback);
 	}
 }

@@ -38,6 +38,11 @@ public class Connection implements Runnable {
 						store = new DataStore(path);
 						out.write(store.serialize());
 
+						// Double null signifies the end of the data
+						out.write(new char[] {
+								(char)0, (char)0
+						});
+
 						sentDataStore = true;
 					} else {
 						DataItem newDataItem = DataItem.parseDataItemText(inputLine);
