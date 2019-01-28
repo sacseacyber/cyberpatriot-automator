@@ -42,7 +42,7 @@ public class Entry {
 			}
 
 			// It won't get here unless admin user
-			Launch launcher = new Launch();
+			new Launch();
 		}
 		// Start the server
 		else {
@@ -55,7 +55,7 @@ public class Entry {
 				location = Paths.get(args[1]);
 			}
 
-			Server server = new Server(location, port);
+			new Server(location, port);
 		}
 	}
 }
