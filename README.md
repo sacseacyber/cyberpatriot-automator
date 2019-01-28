@@ -10,6 +10,7 @@ Will also provide other features such as scoring report management, and for desi
 	- Enable firewall task (Linux)
 	- Disable SSH root login task (Linux)
 	- Auto Windows/Linux task sorting
+2. README parsing
 
 # Planned features
 
@@ -17,8 +18,7 @@ Will also provide other features such as scoring report management, and for desi
 2. Scoring report client
 3. Scoring report server
 4. Plans of Attack
-5. README parsing
-6. User file management
-7. User account management
-8. Audit management
-9. Program management
+5. User file management
+6. User account management
+7. Audit management
+8. Program management
